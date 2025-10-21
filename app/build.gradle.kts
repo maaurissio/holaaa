@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt")
 }
 
 android {
@@ -37,6 +38,9 @@ android {
     buildFeatures {
         compose = true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
+    }
 }
 
 dependencies {
@@ -56,4 +60,24 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    // Navigation Compose
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // ViewModel Compose
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3") // Para collectAsStateWithLifecycle
+
+    // Room (Persistencia de Carrito)
+    implementation("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1") // Para corutinas y Flow
+
+    // Coil (Cargar imágenes desde URL)
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // Para el Swipe-to-Dismiss (Eliminar del carro)
+    implementation("androidx.compose.material3:material3:1.2.1")
+
+    // (Opcional pero recomendado) Íconos extendidos de Material
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
 }
