@@ -75,9 +75,8 @@ dependencies {
     // Coil (Cargar imágenes desde URL)
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // Para el Swipe-to-Dismiss (Eliminar del carro)
-    implementation("androidx.compose.material3:material3:1.2.1")
-
     // (Opcional pero recomendado) Íconos extendidos de Material
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
+
     implementation("androidx.compose.material:material-icons-extended:1.6.8")
 }

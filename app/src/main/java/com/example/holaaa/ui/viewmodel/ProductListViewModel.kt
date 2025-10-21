@@ -2,6 +2,8 @@ package com.example.holaaa.ui.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.holaaa.data.local.AppDatabase
 import com.example.holaaa.data.model.ItemCarrito
@@ -17,7 +19,6 @@ class ProductListViewModel(application: Application) : AndroidViewModel(applicat
     private val cartDao = AppDatabase.getDatabase(application).cartDao()
 
     // Lista de productos simulada (basada en el PDF y proyecto React)
-    // URLs de imágenes simuladas. Reemplaza con URLs reales si las tienes.
     private val _allProducts = listOf(
         Producto("VR001", "Zanahorias", "Frescas y orgánicas de O'Higgins", 1200, 100, "https://i.imgur.com/wS22N9s.jpeg"),
         Producto("VR002", "Espinacas Frescas", "Bolsa de 500g, orgánicas", 700, 80, "https://i.imgur.com/pXQ4nZg.jpeg"),
@@ -68,6 +69,22 @@ class ProductListViewModel(application: Application) : AndroidViewModel(applicat
                     cantidad = 1
                 )
                 cartDao.insertItem(newItem)
+            }
+        }
+    }
+
+    // --- ¡ERROR CORREGIDO AQUÍ! ---
+    // Esta "Factory" le dice a Compose cómo crear un ViewModel que necesita "Application"
+    companion object {
+        val Factory: (Application) -> ViewModelProvider.Factory = { application ->
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    if (modelClass.isAssignableFrom(ProductListViewModel::class.java)) {
+                        return ProductListViewModel(application) as T
+                    }
+                    throw IllegalArgumentException("Unknown ViewModel class")
+                }
             }
         }
     }

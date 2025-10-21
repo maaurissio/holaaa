@@ -15,10 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource // <-- Este import ya lo tenías
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.holaaa.R // <--- ¡¡ESTA ES LA LÍNEA QUE FALTABA!!
 import com.example.holaaa.data.model.Producto
 import com.example.holaaa.ui.viewmodel.ProductListViewModel
 
@@ -82,7 +84,9 @@ fun ProductCard(
                     .fillMaxWidth()
                     .height(120.dp),
                 contentScale = ContentScale.Crop,
-                placeholder = painterResource(id = R.drawable.ic_launcher_background) // Placeholder
+                // --- ERROR CORREGIDO ---
+                // Ahora 'R.drawable.ic_launcher_background' será encontrado
+                placeholder = painterResource(id = R.drawable.ic_launcher_background)
             )
 
             Column(

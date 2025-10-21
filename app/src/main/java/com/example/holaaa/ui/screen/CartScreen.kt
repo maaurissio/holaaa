@@ -2,12 +2,38 @@ package com.example.holaaa.ui.screen
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
+
+// --- ¡CORRECCIÓN IMPORTANTE AQUÍ! ---
+// Imports explícitos para todo lo de Material 3, incluyendo SwipeToDismiss
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DismissValue
+import androidx.compose.material3.ExperimentalMaterial3Api // ¡MUY IMPORTANTE!
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox // El componente que daba error
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDismissState // El estado que daba error
+// --- FIN DE LA CORRECCIÓN DE IMPORTS ---
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,7 +48,7 @@ import coil.compose.AsyncImage
 import com.example.holaaa.data.model.ItemCarrito
 import com.example.holaaa.ui.viewmodel.CartViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class) // Esta anotación ES OBLIGATORIA
 @Composable
 fun CartScreen(
     cartViewModel: CartViewModel
@@ -36,7 +62,6 @@ fun CartScreen(
                 Text("Tu carrito está vacío", style = MaterialTheme.typography.titleLarge)
             }
         } else {
-            // --- REQUISITO: Listado de Carro ---
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(16.dp),
@@ -44,16 +69,17 @@ fun CartScreen(
             ) {
                 items(uiState.items, key = { it.productoId }) { item ->
 
-                    // --- REQUISITO: Eliminar producto mediante desplazar ---
+                    // Ahora 'rememberDismissState' y 'DismissValue' SÍ se encontrarán
                     val dismissState = rememberDismissState(
                         confirmValueChange = { dismissValue ->
                             if (dismissValue == DismissValue.DismissedToEnd || dismissValue == DismissValue.DismissedToStart) {
                                 cartViewModel.deleteItem(item)
-                                true // Confirmamos la eliminación
+                                true
                             } else false
                         }
                     )
 
+                    // Ahora 'SwipeToDismissBox' SÍ se encontrará
                     SwipeToDismissBox(
                         state = dismissState,
                         backgroundContent = {
@@ -65,9 +91,9 @@ fun CartScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(color)
+                                    .background(color) // Usamos .background()
                                     .padding(horizontal = 20.dp),
-                                contentAlignment = Alignment.CenterStart // o CenterEnd
+                                contentAlignment = Alignment.CenterStart
                             ) {
                                 Icon(
                                     Icons.Default.Delete,
@@ -77,11 +103,9 @@ fun CartScreen(
                             }
                         }
                     ) {
-                        // Fila del item
                         CartItemRow(
                             item = item,
                             onQuantityChange = { newQuantity ->
-                                // --- REQUISITO: Modificación de carro de compra ---
                                 cartViewModel.updateQuantity(item, newQuantity)
                             }
                         )
@@ -89,7 +113,7 @@ fun CartScreen(
                 }
             }
 
-            // --- Total y Botón de Pago ---
+            // Total y Botón de Pago
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -104,10 +128,8 @@ fun CartScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        // --- REQUISITO: Enviar la venta al backend ---
                         cartViewModel.registerSale(onSaleRegistered = {
                             Toast.makeText(context, "Venta registrada con éxito", Toast.LENGTH_LONG).show()
-                            // La navegación (si la hubiera) se manejaría aquí
                         })
                     },
                     modifier = Modifier.fillMaxWidth().height(50.dp)
@@ -119,7 +141,7 @@ fun CartScreen(
     }
 }
 
-// Componente Reutilizable para la fila del carrito
+// (El resto del archivo no cambia)
 @Composable
 fun CartItemRow(
     item: ItemCarrito,
@@ -144,8 +166,6 @@ fun CartItemRow(
                 Text(item.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text("$${item.precio}", style = MaterialTheme.typography.bodyMedium)
             }
-
-            // --- REQUISITO: Modificación de carro de compra ---
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { onQuantityChange(item.cantidad - 1) }) {
                     Text("-", style = MaterialTheme.typography.titleLarge)

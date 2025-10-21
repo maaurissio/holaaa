@@ -2,6 +2,8 @@ package com.example.holaaa.ui.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.holaaa.data.local.AppDatabase
 import com.example.holaaa.data.model.ItemCarrito
@@ -14,7 +16,6 @@ import kotlinx.coroutines.launch
 class CartViewModel(application: Application) : AndroidViewModel(application) {
 
     private val cartDao = AppDatabase.getDatabase(application).cartDao()
-    // Aquí iría tu servicio/repositorio de API (ej. Retrofit)
     // private val apiService = ApiService.create()
 
     val cartUiState: StateFlow<CartUiState> = cartDao.getAllItems()
@@ -31,10 +32,8 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
     fun updateQuantity(item: ItemCarrito, newQuantity: Int) {
         viewModelScope.launch {
             if (newQuantity <= 0) {
-                // Si la cantidad es 0 o menos, elimina el item
                 cartDao.deleteItem(item)
             } else {
-                // Si no, actualiza la cantidad
                 cartDao.updateItem(item.copy(cantidad = newQuantity))
             }
         }
@@ -51,29 +50,28 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
             val items = cartUiState.value.items
             if (items.isNotEmpty()) {
 
-                // 1. Crear el objeto Venta (ej. Venta(items = items, total = ...))
-                //    val nuevaVenta = Venta(id = null, items = items, total = cartUiState.value.total)
-
-                // 2. Enviar la venta al backend (Simulación con un delay)
-                //    try {
-                //        apiService.registrarVenta(nuevaVenta)
-                //        Log.d("CartViewModel", "Venta registrada en el backend")
-                //
-                //        // 3. Si la venta es exitosa, limpiar el carro local
-                //        cartDao.clearCart()
-                //        onSaleRegistered() // Llama al callback para notificar a la UI
-                //
-                //    } catch (e: Exception) {
-                //        Log.e("CartViewModel", "Error al registrar la venta", e)
-                //        // (Manejar el error, quizás mostrar un Toast)
-                //    }
-
                 // --- INICIO SIMULACIÓN (Borra esto cuando tengas Retrofit) ---
                 kotlinx.coroutines.delay(1000) // Simula la llamada a la red
                 println("Venta simulada enviada al backend.")
                 cartDao.clearCart()
                 onSaleRegistered()
                 // --- FIN SIMULACIÓN ---
+            }
+        }
+    }
+
+    // --- ¡ERROR CORREGIDO AQUÍ! ---
+    // Esta "Factory" le dice a Compose cómo crear un ViewModel que necesita "Application"
+    companion object {
+        val Factory: (Application) -> ViewModelProvider.Factory = { application ->
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    if (modelClass.isAssignableFrom(CartViewModel::class.java)) {
+                        return CartViewModel(application) as T
+                    }
+                    throw IllegalArgumentException("Unknown ViewModel class")
+                }
             }
         }
     }

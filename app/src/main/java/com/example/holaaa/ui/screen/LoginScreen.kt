@@ -13,13 +13,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.painterResource // <-- Este import ya lo tenías
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.holaaa.R // Asegúrate de tener un logo en res/drawable
+import com.example.holaaa.R // <--- ¡¡ESTA ES LA LÍNEA QUE FALTABA!!
 import com.example.holaaa.navigation.AppScreens
 import com.example.holaaa.ui.viewmodel.LoginViewModel
 
@@ -39,11 +39,13 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        //
-        // **IMPORTANTE**: Debes agregar una imagen de logo llamada 'logo_huerto'
-        // en la carpeta 'app/src/main/res/drawable/'
+        // [Image of Huerto Hogar logo]
+        // **IMPORTANTE**: La línea de la imagen está comentada.
+        // Si quieres que se vea, quita las barras "//" de abajo.
+        // (Asegúrate de tener un logo 'logo_huerto.png' en 'app/src/main/res/drawable/')
+
         // Image(
-        //    painter = painterResource(id = R.drawable.logo_huerto),
+        //    painter = painterResource(id = R.drawable.logo_huerto), // Ahora R.drawable SÍ funciona
         //    contentDescription = "Logo Huerto Hogar",
         //    modifier = Modifier.size(150.dp)
         // )

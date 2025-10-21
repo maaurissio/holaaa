@@ -1,6 +1,9 @@
 package com.example.holaaa.ui.screen
 
 import android.annotation.SuppressLint
+import android.app.Application // <-- Importar Application
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
@@ -13,12 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel // <-- Importar viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,25 +36,26 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    // NavController para las pantallas INTERNAS (Listado, Carrito, etc.)
     val internalNavController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // ViewModels (usamos factory para pasar el 'Application' context)
-    val context = LocalContext.current
+    // --- ¡ERROR CORREGIDO AQUÍ! ---
+    // Obtenemos el contexto de la aplicación
+    val application = LocalContext.current.applicationContext as Application
+
+    // Usamos las 'Factories' para crear los ViewModels
     val productListViewModel: ProductListViewModel = viewModel(
-        factory = ProductListViewModel.Factory(context.applicationContext as android.app.Application)
+        factory = ProductListViewModel.Factory(application)
     )
     val cartViewModel: CartViewModel = viewModel(
-        factory = CartViewModel.Factory(context.applicationContext as android.app.Application)
+        factory = CartViewModel.Factory(application)
     )
+    // --- FIN DE LA CORRECCIÓN ---
 
-    // Observa el estado del carrito para mostrar el badge
     val cartState by cartViewModel.cartUiState.collectAsState()
     val cartItemCount = cartState.items.sumOf { it.cantidad }
 
-    // Título dinámico
     val navBackStackEntry by internalNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val currentTitle = when (currentRoute) {
@@ -67,15 +71,12 @@ fun MainScreen() {
             DrawerContent(
                 onNavigate = { route ->
                     internalNavController.navigate(route) {
-                        // Navegación de item de menú (estilo singleTop)
                         popUpTo(internalNavController.graph.findStartDestination().id)
                         launchSingleTop = true
                     }
                     scope.launch { drawerState.close() }
                 },
                 onLogout = {
-                    // Aquí iría la lógica para volver al Login
-                    // Por ahora, solo cerramos el drawer
                     scope.launch { drawerState.close() }
                 }
             )
@@ -83,7 +84,6 @@ fun MainScreen() {
     ) {
         Scaffold(
             topBar = {
-                // --- REQUISITO: Navbar y Acciones en AppBar ---
                 TopAppBar(
                     title = { Text(currentTitle) },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -93,7 +93,6 @@ fun MainScreen() {
                         navigationIconContentColor = MaterialTheme.colorScheme.onTertiary
                     ),
                     navigationIcon = {
-                        // --- REQUISITO: Botón para Drawer ---
                         IconButton(onClick = {
                             scope.launch { drawerState.open() }
                         }) {
@@ -101,7 +100,6 @@ fun MainScreen() {
                         }
                     },
                     actions = {
-                        // --- REQUISITO: Acción en AppBar (Carrito) ---
                         BadgedBox(
                             badge = {
                                 if (cartItemCount > 0) {
@@ -119,7 +117,6 @@ fun MainScreen() {
                 )
             }
         ) { paddingValues ->
-            // Contenido de las pantallas (Listado, Carrito, etc.)
             NavHost(
                 navController = internalNavController,
                 startDestination = AppScreens.ProductList.route,
@@ -127,18 +124,17 @@ fun MainScreen() {
             ) {
                 composable(AppScreens.ProductList.route) {
                     ProductListScreen(
-                        // Pasamos el ViewModel ya creado
+                        // Ahora solo pasamos el ViewModel
                         productListViewModel = productListViewModel
                     )
                 }
                 composable(AppScreens.Cart.route) {
                     CartScreen(
-                        // Pasamos el ViewModel ya creado
+                        // Ahora solo pasamos el ViewModel
                         cartViewModel = cartViewModel
                     )
                 }
                 composable(AppScreens.Profile.route) {
-                    // Pantalla de perfil (ejemplo)
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Pantalla de Perfil")
                     }
@@ -148,7 +144,6 @@ fun MainScreen() {
     }
 }
 
-// --- REQUISITO: Drawer Content ---
 @Composable
 fun DrawerContent(
     onNavigate: (String) -> Unit,
@@ -180,7 +175,7 @@ fun DrawerItem(label: String, icon: ImageVector, onClick: () -> Unit) {
     NavigationDrawerItem(
         icon = { Icon(icon, contentDescription = label) },
         label = { Text(label) },
-        selected = false, // Puedes manejar el estado 'selected' si lo deseas
+        selected = false,
         onClick = onClick,
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
     )
