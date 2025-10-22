@@ -1,11 +1,17 @@
 package com.example.holaaa.ui.screen
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddShoppingCart
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -13,45 +19,52 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource // <-- Este import ya lo tenías
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.holaaa.R // <--- ¡¡ESTA ES LA LÍNEA QUE FALTABA!!
 import com.example.holaaa.data.model.Producto
+import com.example.holaaa.navigation.AppScreens
 import com.example.holaaa.ui.viewmodel.ProductListViewModel
 
 @Composable
 fun ProductListScreen(
-    productListViewModel: ProductListViewModel
+    productListViewModel: ProductListViewModel,
+    navController: NavController
 ) {
     val uiState by productListViewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(8.dp)) {
-
-        // --- REQUISITO: Búsqueda ---
-        OutlinedTextField(
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+        TextField(
             value = uiState.searchQuery,
             onValueChange = { productListViewModel.onSearchQueryChange(it) },
-            label = { Text("Buscar producto...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            placeholder = { Text("Buscar", color = Color.Gray) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp),
+                .padding(vertical = 16.dp)
+                .clip(RoundedCornerShape(30.dp)),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.LightGray.copy(alpha = 0.2f),
+                unfocusedContainerColor = Color.LightGray.copy(alpha = 0.2f),
+                disabledContainerColor = Color.LightGray.copy(alpha = 0.2f),
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
             singleLine = true
         )
 
-        // --- REQUISITO: Listado de Productos (con imágenes) ---
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2), // 2 columnas
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            columns = GridCells.Fixed(2),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(uiState.products, key = { it.id }) { producto ->
                 ProductCard(
@@ -59,6 +72,12 @@ fun ProductListScreen(
                     onAddToCart = {
                         productListViewModel.addToCart(it)
                         Toast.makeText(context, "${it.nombre} agregado", Toast.LENGTH_SHORT).show()
+                    },
+                    onFavoriteClick = {
+                        Toast.makeText(context, "Favorito: ${producto.nombre}", Toast.LENGTH_SHORT).show()
+                    },
+                    onCardClick = {
+                        navController.navigate(AppScreens.ProductDetail.route)
                     }
                 )
             }
@@ -66,58 +85,77 @@ fun ProductListScreen(
     }
 }
 
-// Componente Reutilizable para la tarjeta de producto
 @Composable
 fun ProductCard(
     producto: Producto,
-    onAddToCart: (Producto) -> Unit
+    onAddToCart: (Producto) -> Unit,
+    onFavoriteClick: () -> Unit,
+    onCardClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        modifier = Modifier.clickable(onClick = onCardClick)
     ) {
         Column {
-            AsyncImage(
-                model = producto.imagenUrl,
-                contentDescription = producto.nombre,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
-                contentScale = ContentScale.Crop,
-                // --- ERROR CORREGIDO ---
-                // Ahora 'R.drawable.ic_launcher_background' será encontrado
-                placeholder = painterResource(id = R.drawable.ic_launcher_background)
-            )
+                    .height(150.dp)
+            ) {
+                AsyncImage(
+                    model = producto.imagenUrl,
+                    contentDescription = producto.nombre,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+                IconButton(
+                    onClick = onFavoriteClick,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .background(Color.White.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorite", tint = Color.Black)
+                }
+            }
 
             Column(
                 modifier = Modifier.padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = producto.nombre,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = "$${producto.precio}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = producto.descripcion,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.height(32.dp) // Altura fija para alinear botones
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { onAddToCart(producto) },
-                    modifier = Modifier.fillMaxWidth()
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Agregar")
+                    Text(
+                        text = "$${String.format("%.2f", producto.precio.toDouble())}",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    IconButton(
+                        onClick = { onAddToCart(producto) },
+                        modifier = Modifier
+                            .size(32.dp)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddShoppingCart,
+                            contentDescription = "Add to Cart",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }

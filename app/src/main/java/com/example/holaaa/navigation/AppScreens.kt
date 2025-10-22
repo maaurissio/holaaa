@@ -2,10 +2,15 @@ package com.example.holaaa.navigation
 
 sealed class AppScreens(val route: String) {
     object Login : AppScreens("login_screen")
-    object MainApp : AppScreens("main_app_screen") // Contenedor para el drawer
+    object MainApp : AppScreens("main_app_screen")
 
-    // Pantallas internas de MainApp
-    object ProductList : AppScreens("product_list_screen")
+    // Pantallas del Bottom Nav
+    object Home : AppScreens("home_screen")
+    object Shopping : AppScreens("shopping_screen")
+    object Wishlist : AppScreens("wishlist_screen")
+    object Account : AppScreens("account_screen")
+
+    // Otras pantallas
     object Cart : AppScreens("cart_screen")
-    object Profile : AppScreens("profile_screen") // Ejemplo para el Drawer
+    object ProductDetail : AppScreens("product_detail_screen")
 }

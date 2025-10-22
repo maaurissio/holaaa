@@ -11,13 +11,13 @@ import com.example.holaaa.ui.screen.MainScreen
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = AppScreens.Login.route) {
+    // Cambiamos la ruta inicial a la pantalla principal de la app
+    NavHost(navController = navController, startDestination = AppScreens.MainApp.route) {
 
         composable(AppScreens.Login.route) {
             LoginScreen(navController = navController)
         }
 
-        // MainScreen contendrá el Drawer, Navbar y el NavHost interno
         composable(AppScreens.MainApp.route) {
             MainScreen()
         }
