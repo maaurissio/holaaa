@@ -18,22 +18,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-
-// --- ¡CORRECCIÓN IMPORTANTE AQUÍ! ---
-// Imports explícitos para todo lo de Material 3, incluyendo SwipeToDismiss
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DismissValue
-import androidx.compose.material3.ExperimentalMaterial3Api // ¡MUY IMPORTANTE!
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissBox // El componente que daba error
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDismissState // El estado que daba error
-// --- FIN DE LA CORRECCIÓN DE IMPORTS ---
-
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,7 +43,7 @@ import coil.compose.AsyncImage
 import com.example.holaaa.data.model.ItemCarrito
 import com.example.holaaa.ui.viewmodel.CartViewModel
 
-@OptIn(ExperimentalMaterial3Api::class) // Esta anotación ES OBLIGATORIA
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     cartViewModel: CartViewModel
@@ -69,31 +64,31 @@ fun CartScreen(
             ) {
                 items(uiState.items, key = { it.productoId }) { item ->
 
-                    // Ahora 'rememberDismissState' y 'DismissValue' SÍ se encontrarán
-                    val dismissState = rememberDismissState(
+                    val dismissState = rememberSwipeToDismissBoxState(
                         confirmValueChange = { dismissValue ->
-                            if (dismissValue == DismissValue.DismissedToEnd || dismissValue == DismissValue.DismissedToStart) {
+                            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
                                 cartViewModel.deleteItem(item)
                                 true
-                            } else false
+                            } else {
+                                false
+                            }
                         }
                     )
 
-                    // Ahora 'SwipeToDismissBox' SÍ se encontrará
                     SwipeToDismissBox(
                         state = dismissState,
+                        enableDismissFromStartToEnd = false,
                         backgroundContent = {
                             val color = when(dismissState.targetValue) {
-                                DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.errorContainer
-                                DismissValue.DismissedToStart -> MaterialTheme.colorScheme.errorContainer
+                                SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
                                 else -> Color.Transparent
                             }
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(color) // Usamos .background()
+                                    .background(color)
                                     .padding(horizontal = 20.dp),
-                                contentAlignment = Alignment.CenterStart
+                                contentAlignment = Alignment.CenterEnd
                             ) {
                                 Icon(
                                     Icons.Default.Delete,
