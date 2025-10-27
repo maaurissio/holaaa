@@ -2,25 +2,43 @@ package com.example.holaaa.ui.screen
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.holaaa.data.model.ItemCarrito
 import com.example.holaaa.ui.viewmodel.CartViewModel
@@ -33,172 +51,125 @@ fun CartScreen(
     val uiState by cartViewModel.cartUiState.collectAsState()
     val context = LocalContext.current
 
-    if (uiState.items.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Tu carrito está vacío", style = MaterialTheme.typography.titleLarge)
-        }
-        return
-    }
+    Column(Modifier.fillMaxSize()) {
+        if (uiState.items.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Tu carrito está vacío", style = MaterialTheme.typography.titleLarge)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(uiState.items, key = { it.productoId }) { item ->
 
-    var discountCode by remember { mutableStateOf("") }
-    val discount = 25.0 // Hardcoded for design
+                    val dismissState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = { dismissValue ->
+                            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                                cartViewModel.deleteItem(item)
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                    )
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(uiState.items, key = { it.productoId }) { item ->
-                CartItemRow(
-                    item = item,
-                    onQuantityChange = { newQuantity ->
-                        cartViewModel.updateQuantity(item, newQuantity)
-                    },
-                    onDeleteItem = { cartViewModel.deleteItem(item) }
+                    SwipeToDismissBox(
+                        state = dismissState,
+                        enableDismissFromStartToEnd = false,
+                        backgroundContent = {
+                            val color = when(dismissState.targetValue) {
+                                SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
+                                else -> Color.Transparent
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(color)
+                                    .padding(horizontal = 20.dp),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Eliminar",
+                                    tint = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                        }
+                    ) {
+                        CartItemRow(
+                            item = item,
+                            onQuantityChange = { newQuantity ->
+                                cartViewModel.updateQuantity(item, newQuantity)
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Total y Botón de Pago
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = "Total: $${uiState.total}",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        cartViewModel.registerSale(onSaleRegistered = {
+                            Toast.makeText(context, "Venta registrada con éxito", Toast.LENGTH_LONG).show()
+                        })
+                    },
+                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                ) {
+                    Text("Enviar Venta", style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
-
-        // Checkout Section
-        CheckoutSection(
-            subtotal = uiState.total.toDouble(),
-            discount = discount,
-            discountCode = discountCode,
-            onDiscountCodeChange = { discountCode = it },
-            onApplyDiscount = {
-                Toast.makeText(context, "Descuento aplicado", Toast.LENGTH_SHORT).show()
-            },
-            onCheckout = {
-                cartViewModel.registerSale(onSaleRegistered = {
-                    Toast.makeText(context, "Venta registrada con éxito", Toast.LENGTH_LONG).show()
-                })
-            }
-        )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+// (El resto del archivo no cambia)
 @Composable
 fun CartItemRow(
     item: ItemCarrito,
-    onQuantityChange: (Int) -> Unit,
-    onDeleteItem: () -> Unit
+    onQuantityChange: (Int) -> Unit
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart) {
-                onDeleteItem()
-                true
-            } else false
-        }
-    )
-
-    SwipeToDismissBox(
-        state = dismissState,
-        enableDismissFromStartToEnd = false,
-        backgroundContent = {
-            val color = when (dismissState.targetValue) {
-                SwipeToDismissBoxValue.EndToStart -> Color(0xFFFF5722).copy(alpha = 0.8f)
-                else -> Color.Transparent
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color, shape = RoundedCornerShape(20.dp))
-                    .padding(horizontal = 20.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.White)
-            }
-        }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(2.dp)
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AsyncImage(
-                    model = item.imagenUrl,
-                    contentDescription = item.nombre,
-                    modifier = Modifier.size(80.dp).clip(RoundedCornerShape(16.dp)),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(item.nombre, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Text("$${String.format("%.2f", item.precio.toDouble())}", color = Color.Gray, fontSize = 14.sp)
+            AsyncImage(
+                model = item.imagenUrl,
+                contentDescription = item.nombre,
+                modifier = Modifier.size(60.dp),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(item.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("$${item.precio}", style = MaterialTheme.typography.bodyMedium)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { onQuantityChange(item.cantidad - 1) }) {
+                    Text("-", style = MaterialTheme.typography.titleLarge)
                 }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    QuantityButton(text = "-") { onQuantityChange(item.cantidad - 1) }
-                    Text("${item.cantidad}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    QuantityButton(text = "+") { onQuantityChange(item.cantidad + 1) }
+                Text("${item.cantidad}", style = MaterialTheme.typography.titleMedium, modifier = Modifier.width(24.dp))
+                IconButton(onClick = { onQuantityChange(item.cantidad + 1) }) {
+                    Text("+", style = MaterialTheme.typography.titleLarge)
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun QuantityButton(text: String, onClick: () -> Unit) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier.size(30.dp).background(Color(0xFFFF5722), CircleShape)
-    ) {
-        Text(text, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-fun CheckoutSection(
-    subtotal: Double,
-    discount: Double,
-    discountCode: String,
-    onDiscountCodeChange: (String) -> Unit,
-    onApplyDiscount: () -> Unit,
-    onCheckout: () -> Unit
-) {
-    val total = subtotal - discount
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        OutlinedTextField(
-            value = discountCode,
-            onValueChange = onDiscountCodeChange,
-            label = { Text("Enter Discount Code") },
-            modifier = Modifier.fillMaxWidth(),
-            trailingIcon = {
-                TextButton(onClick = onApplyDiscount) {
-                    Text("Apply", color = Color(0xFFFF5722))
-                }
-            }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Sub total:", color = Color.Gray)
-            Text("$${String.format("%.2f", subtotal)}", fontWeight = FontWeight.Medium)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Discount:", color = Color.Gray)
-            Text("-$${String.format("%.2f", discount)}", fontWeight = FontWeight.Medium)
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Total:", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text("$${String.format("%.2f", total)}", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = onCheckout,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))
-        ) {
-            Text("Checkout", modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-            Icon(Icons.Default.ArrowForward, contentDescription = null)
         }
     }
 }
