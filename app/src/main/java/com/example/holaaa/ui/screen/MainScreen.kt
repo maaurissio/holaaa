@@ -2,6 +2,8 @@ package com.example.holaaa.ui.screen
 
 import android.annotation.SuppressLint
 import android.app.Application
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -13,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -48,8 +51,8 @@ fun MainScreen() {
     val currentDestination = navBackStackEntry?.destination
 
     val currentTitle = when (currentDestination?.route) {
-        AppScreens.Home.route -> "Categorías"
-        AppScreens.Shopping.route -> "Shopping"
+        AppScreens.Home.route -> "Invitado"
+        AppScreens.Shopping.route -> "Todos los Productos"
         AppScreens.Wishlist.route -> "Favoritos"
         AppScreens.Account.route -> "Mi Cuenta"
         AppScreens.Cart.route -> "Mi Carrito"
@@ -59,7 +62,6 @@ fun MainScreen() {
 
     Scaffold(
         topBar = {
-            // Ocultar TopAppBar en la pantalla de detalle para un look más limpio
             if (currentDestination?.route != AppScreens.ProductDetail.route) {
                 TopAppBar(
                     title = { Text(currentTitle) },
@@ -87,7 +89,6 @@ fun MainScreen() {
             }
         },
         bottomBar = {
-            // Ocultar BottomNavBar en la pantalla de detalle
             if (currentDestination?.route != AppScreens.ProductDetail.route) {
                 NavigationBar {
                     val items = listOf(
@@ -127,7 +128,12 @@ fun MainScreen() {
                     navController = internalNavController
                 )
             }
-            composable(AppScreens.Shopping.route) { ShoppingScreen() }
+            composable(AppScreens.Shopping.route) { 
+                 ShoppingScreen(
+                    productListViewModel = productListViewModel,
+                    navController = internalNavController
+                )
+            }
             composable(AppScreens.Wishlist.route) { WishlistScreen() }
             composable(AppScreens.Account.route) { AccountScreen() }
             composable(AppScreens.Cart.route) {

@@ -2,11 +2,11 @@ package com.example.holaaa.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Colores de Huerto Hogar
-val VerdePrincipal = Color(0xFF4CAF50) // Verde fuerte para botones y acentos
-val VerdeClaro = Color(0xFF81C784)   // Verde más suave
-val VerdeOscuro = Color(0xFF388E3C)  // Para el Navbar/Appbar
-val CremaFondo = Color(0xFFFFFFF0)   // Un fondo color crema/blanco hueso
-val TextoOscuro = Color(0xFF212121)
-val TextoClaro = Color(0xFFFFFFFF)
-val RojoEliminar = Color(0xFFD32F2F)
+// Paleta de Colores HuertoHogar
+val VerdeEsmeralda = Color(0xFF2E8B57)
+val MarronClaro = Color(0xFFB84513)
+val AmarilloMostaza = Color(0xFFFFD700)
+val BlancoSuave = Color(0xFFF7F7F7)
+val GrisOscuro = Color(0xFF333333)
+val GrisMedio = Color(0xFF666666)
+val RojoError = Color(0xFFD32F2F)

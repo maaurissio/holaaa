@@ -19,14 +19,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.HelpOutline
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.NotificationsNone
-import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,52 +42,51 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun AccountScreen() {
-    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F8F8))
+            .background(MaterialTheme.colorScheme.background) // Usando color del tema
             .padding(horizontal = 16.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // User Profile Section
-        ProfileCard(onCopy = { Toast.makeText(context, "Email copied!", Toast.LENGTH_SHORT).show() })
+        Spacer(modifier = Modifier.height(24.dp))
+        GuestProfileCard()
         Spacer(modifier = Modifier.height(32.dp))
-
-        // Settings Section
         SettingsSection()
         Spacer(modifier = Modifier.height(32.dp))
-
-        // Support Section
         SupportSection()
     }
 }
 
 @Composable
-fun ProfileCard(onCopy: () -> Unit) {
+fun GuestProfileCard() {
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface) // Usando color del tema
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Reemplazamos la imagen por un Box para evitar crasheos si la imagen no existe
         Box(
             modifier = Modifier
                 .size(60.dp)
                 .clip(CircleShape)
-                .background(Color.LightGray)
-        )
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Outlined.Person, contentDescription = "Guest Avatar", tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f), modifier = Modifier.size(30.dp))
+        }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text("Alex Richards", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text("alex.richards@***ple.com", color = Color.Gray, fontSize = 14.sp)
+            Text("Invitado", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)
+            Text("Inicia sesión para ver tus datos", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 14.sp)
         }
-        IconButton(onClick = onCopy) {
-            Icon(Icons.Default.ContentCopy, contentDescription = "Copy Email", tint = Color.Gray)
+        Button(
+            onClick = { Toast.makeText(context, "Login/Register Clicked", Toast.LENGTH_SHORT).show() },
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text("Entrar")
         }
     }
 }
@@ -96,30 +95,30 @@ fun ProfileCard(onCopy: () -> Unit) {
 fun SettingsSection() {
     val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Settings", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp))
+        Text("Ajustes", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp), color = MaterialTheme.colorScheme.onBackground)
         SettingItem(
-            icon = Icons.Default.PersonOutline,
-            title = "Account Details",
+            icon = Icons.Outlined.Person,
+            title = "Detalles de la Cuenta",
             onClick = { Toast.makeText(context, "Account Details Clicked", Toast.LENGTH_SHORT).show() }
         )
         SettingItem(
-            icon = Icons.Default.NotificationsNone,
-            title = "Notifications",
+            icon = Icons.Outlined.NotificationsNone,
+            title = "Notificaciones",
             onClick = { Toast.makeText(context, "Notifications Clicked", Toast.LENGTH_SHORT).show() }
         )
         SettingItem(
-            icon = Icons.Default.Email,
+            icon = Icons.Outlined.Email,
             title = "Email",
             onClick = { Toast.makeText(context, "Email Clicked", Toast.LENGTH_SHORT).show() }
         )
         SettingItem(
-            icon = Icons.Default.LocationOn,
-            title = "Location Services",
+            icon = Icons.Outlined.LocationOn,
+            title = "Servicios de ubicación",
             onClick = { Toast.makeText(context, "Location Services Clicked", Toast.LENGTH_SHORT).show() }
         )
         SettingItem(
             icon = Icons.AutoMirrored.Filled.ExitToApp,
-            title = "Log Out",
+            title = "Cerrar Sesión",
             isLogout = true,
             onClick = { Toast.makeText(context, "Log Out Clicked", Toast.LENGTH_SHORT).show() }
         )
@@ -130,10 +129,10 @@ fun SettingsSection() {
 fun SupportSection() {
     val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Support", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp))
+        Text("Soporte", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp), color = MaterialTheme.colorScheme.onBackground)
         SettingItem(
-            icon = Icons.Default.HelpOutline,
-            title = "Contact Us",
+            icon = Icons.Outlined.HelpOutline,
+            title = "Contáctanos",
             onClick = { Toast.makeText(context, "Contact Us Clicked", Toast.LENGTH_SHORT).show() }
         )
     }
@@ -145,7 +144,7 @@ fun SettingItem(icon: ImageVector, title: String, isLogout: Boolean = false, onC
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -154,20 +153,20 @@ fun SettingItem(icon: ImageVector, title: String, isLogout: Boolean = false, onC
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.05f)),
+                .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = title,
-                tint = if (isLogout) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (isLogout) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(22.dp)
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = title,
-            color = if (isLogout) Color.Red else MaterialTheme.colorScheme.onSurface,
+            color = if (isLogout) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
             fontSize = 16.sp,
             fontWeight = FontWeight.Normal,
             modifier = Modifier.weight(1f)
@@ -176,7 +175,7 @@ fun SettingItem(icon: ImageVector, title: String, isLogout: Boolean = false, onC
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                 contentDescription = "Go",
-                tint = Color.Gray,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.size(16.dp)
             )
         }

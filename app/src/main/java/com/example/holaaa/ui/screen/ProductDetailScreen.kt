@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddShoppingCart
@@ -46,28 +48,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-
-const val productName = "Cotton T-Shirt"
-const val productCategory = "Outerwear Men"
-const val productPrice = 86.00
-const val productDescription = "A cotton t-shirt is a must-have for its softness, breathability, and effortless style. Ideal for cool in warm weather and adds a light layer when needed. With a range of colors..."
+import com.example.holaaa.data.model.Producto
 
 @Composable
 fun ProductDetailScreen(navController: NavController) {
+    // Usamos un producto de ejemplo de Huerto Hogar
+    val producto = productosHuertoHogar["Frutas Frescas"]!!
     val context = LocalContext.current
     var selectedImageIndex by remember { mutableStateOf(0) }
-    val imageCount = 4 // Number of placeholder images
-    var selectedSize by remember { mutableStateOf("L") }
-    val sizes = listOf("S", "M", "L", "XL")
+    val imageCount = 4
     var quantity by remember { mutableStateOf(1) }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .verticalScroll(rememberScrollState()) // Hacemos la columna scrollable
+    ) {
         Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
-            // Main product image placeholder
-            Box(
-                modifier = Modifier.fillMaxSize().background(Color.LightGray)
-            )
-            // Top buttons
+            Box(modifier = Modifier.fillMaxSize().background(Color.LightGray))
+
             Row(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -80,14 +80,14 @@ fun ProductDetailScreen(navController: NavController) {
                     Icon(Icons.Default.Share, contentDescription = "Share", tint = Color.Black)
                 }
             }
-            // Favorite button
+
             IconButton(
                 onClick = { /* Favorite action */ },
                 modifier = Modifier.align(Alignment.TopEnd).padding(top = 60.dp, end = 16.dp)
             ) {
                 Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorite", tint = Color.Black)
             }
-            // Image gallery
+
             Card(
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp),
@@ -103,7 +103,7 @@ fun ProductDetailScreen(navController: NavController) {
                                 .clickable { selectedImageIndex = index }
                                 .border(
                                     width = if (selectedImageIndex == index) 2.dp else 0.dp,
-                                    color = if (selectedImageIndex == index) Color(0xFFFF5722) else Color.Transparent,
+                                    color = if (selectedImageIndex == index) MaterialTheme.colorScheme.primary else Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
                                 )
                         )
@@ -115,15 +115,15 @@ fun ProductDetailScreen(navController: NavController) {
         // Product Info
         Column(modifier = Modifier.padding(24.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(productName, fontWeight = FontWeight.Bold, fontSize = 24.sp, modifier = Modifier.weight(1f))
-                Text("$${String.format("%.2f", productPrice)}", fontWeight = FontWeight.Bold, fontSize = 24.sp)
+                Text(producto.nombre, fontWeight = FontWeight.Bold, fontSize = 24.sp, modifier = Modifier.weight(1f))
+                Text("$${producto.precio}", fontWeight = FontWeight.Bold, fontSize = 24.sp)
             }
-            Text(productCategory, color = Color.Gray, fontSize = 14.sp)
+            Text("Stock: ${producto.stock} disponibles", color = Color.Gray, fontSize = 14.sp)
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Size & Quantity
+            // Quantity Selector
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Select Size", fontWeight = FontWeight.Medium, fontSize = 16.sp, modifier = Modifier.weight(1f))
+                Text("Cantidad", fontWeight = FontWeight.Medium, fontSize = 16.sp, modifier = Modifier.weight(1f))
                 Row {
                     IconButton(onClick = { if (quantity > 1) quantity-- }) {
                         Text("-", fontSize = 20.sp)
@@ -134,45 +134,29 @@ fun ProductDetailScreen(navController: NavController) {
                     }
                 }
             }
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(sizes.size) { index ->
-                    val size = sizes[index]
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(if (selectedSize == size) Color(0xFFFF5722) else Color.LightGray.copy(0.2f))
-                            .clickable { selectedSize = size },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(size, color = if (selectedSize == size) Color.White else Color.Black, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
             Spacer(modifier = Modifier.height(16.dp))
 
             // Description
-            Text("Description", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text(productDescription, color = Color.Gray, fontSize = 14.sp, maxLines = 3, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            Text("Learn More", color = Color(0xFFFF5722), fontWeight = FontWeight.Bold, modifier = Modifier.clickable { /* Navigate to full description */ })
-            Spacer(modifier = Modifier.height(16.dp))
+            Text("Descripción", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(producto.descripcion, color = Color.Gray, fontSize = 14.sp)
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Action Buttons
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(
-                    onClick = { Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show() },
+                    onClick = { Toast.makeText(context, "Agregado al carrito", Toast.LENGTH_SHORT).show() },
                     modifier = Modifier.size(60.dp),
                     shape = CircleShape
                 ) {
                     Icon(Icons.Default.AddShoppingCart, contentDescription = "Add to Cart")
                 }
                 Button(
-                    onClick = { Toast.makeText(context, "Buying now!", Toast.LENGTH_SHORT).show() },
+                    onClick = { Toast.makeText(context, "Comprando ahora!", Toast.LENGTH_SHORT).show() },
                     modifier = Modifier.weight(1f).height(60.dp),
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Buy Now", fontSize = 18.sp)
+                    Text("Comprar Ahora", fontSize = 18.sp)
                 }
             }
         }

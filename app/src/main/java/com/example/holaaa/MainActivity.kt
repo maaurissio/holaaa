@@ -7,19 +7,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.holaaa.navigation.AppNavigation // <-- IMPORTANTE
-import com.example.holaaa.ui.theme.HolaaaTheme
+import com.example.holaaa.navigation.AppNavigation
+import com.example.holaaa.ui.theme.HuertoHogarTheme // <-- Cambio importante aquí
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            HolaaaTheme {
+            // Envolvemos todo con nuestro nuevo tema
+            HuertoHogarTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation() // El punto de entrada de tu app
+                    AppNavigation() 
                 }
             }
         }
