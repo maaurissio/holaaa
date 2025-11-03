@@ -5,10 +5,10 @@ sealed class AppScreens(val route: String) {
     object MainApp : AppScreens("main_app_screen")
 
     // Pantallas del Bottom Nav
-    object Home : AppScreens("home_screen")
-    object Shopping : AppScreens("shopping_screen")
-    object Wishlist : AppScreens("wishlist_screen")
-    object Account : AppScreens("account_screen")
+    object Inicio : AppScreens("inicio_screen")
+    object Compras : AppScreens("compras_screen")
+    object Favoritos : AppScreens("favoritos_screen")
+    object Cuenta : AppScreens("cuenta_screen")
 
     // Otras pantallas
     object Cart : AppScreens("cart_screen")

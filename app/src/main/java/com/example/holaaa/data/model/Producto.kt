@@ -1,10 +1,12 @@
 package com.example.holaaa.data.model
 
+import androidx.annotation.DrawableRes
+
 data class Producto(
     val id: String,
     val nombre: String,
     val descripcion: String,
     val precio: Int,
     val stock: Int,
-    val imagenUrl: String
+    @DrawableRes val imagenResId: Int
 )

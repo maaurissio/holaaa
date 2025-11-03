@@ -1,6 +1,7 @@
 package com.example.holaaa.ui.screen
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,18 +16,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import com.example.holaaa.R
 import com.example.holaaa.data.model.Producto
 import com.example.holaaa.navigation.AppScreens
 import com.example.holaaa.ui.viewmodel.ProductListViewModel
+import java.util.Locale
 
 // --- Datos de ejemplo de Huerto Hogar ---
 val categoriasHuertoHogar = listOf(
@@ -37,10 +39,10 @@ val categoriasHuertoHogar = listOf(
 )
 
 val productosHuertoHogar = mapOf(
-    "Frutas Frescas" to Producto(id = "FR001", nombre = "Manzanas Fuji", precio = 1200, stock = 150, descripcion = "Manzanas Fuji crujientes y dulces...", imagenUrl = ""),
-    "Verduras Orgánicas" to Producto(id = "VR001", nombre = "Zanahorias Orgánicas", precio = 900, stock = 100, descripcion = "Zanahorias crujientes cultivadas sin pesticidas...", imagenUrl = ""),
-    "Productos Orgánicos" to Producto(id = "PO001", nombre = "Miel Orgánica", precio = 5000, stock = 50, descripcion = "Miel pura y orgánica producida por apicultores locales...", imagenUrl = ""),
-    "Productos Lácteos" to Producto(id = "PL001", nombre = "Leche Entera", precio = 1000, stock = 80, descripcion = "Leche fresca de granjas locales...", imagenUrl = "")
+    "Frutas Frescas" to Producto(id = "FR001", nombre = "Manzanas Fuji", precio = 1200, stock = 150, descripcion = "Manzanas Fuji crujientes y dulces...", imagenResId = R.drawable.manzana),
+    "Verduras Orgánicas" to Producto(id = "VR001", nombre = "Zanahorias Orgánicas", precio = 900, stock = 100, descripcion = "Zanahorias crujientes cultivadas sin pesticidas...", imagenResId = R.drawable.zanahorias),
+    "Productos Orgánicos" to Producto(id = "PO001", nombre = "Miel Orgánica", precio = 5000, stock = 50, descripcion = "Miel pura y orgánica producida por apicultores locales...", imagenResId = R.drawable.miel),
+    "Productos Lácteos" to Producto(id = "PL001", nombre = "Leche Entera", precio = 1000, stock = 80, descripcion = "Leche fresca de granjas locales...", imagenResId = R.drawable.leche)
 )
 // ----------------------------------------
 
@@ -67,7 +69,7 @@ fun ProductListScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(categoria, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-                        TextButton(onClick = { navController.navigate(AppScreens.Shopping.route) }) {
+                        TextButton(onClick = { navController.navigate(AppScreens.Compras.route) }) {
                             Text("Ver todos", color = MaterialTheme.colorScheme.primary)
                         }
                     }
@@ -106,14 +108,12 @@ fun ProductCard(
                     .height(150.dp)
                     .background(MaterialTheme.colorScheme.background) // Placeholder color
             ) {
-                if (producto.imagenUrl.isNotEmpty()) {
-                    AsyncImage(
-                        model = producto.imagenUrl,
-                        contentDescription = producto.nombre,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
-                }
+                Image(
+                    painter = painterResource(id = producto.imagenResId),
+                    contentDescription = producto.nombre,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
                 IconButton(
                     onClick = onFavoriteClick,
                     modifier = Modifier
@@ -143,7 +143,7 @@ fun ProductCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "$${String.format("%.2f", producto.precio.toDouble())}",
+                        text = "$${String.format(Locale.getDefault(), "%.2f", producto.precio.toDouble())}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.primary

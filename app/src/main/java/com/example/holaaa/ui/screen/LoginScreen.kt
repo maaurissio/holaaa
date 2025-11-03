@@ -1,111 +1,59 @@
 package com.example.holaaa.ui.screen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource // <-- Este import ya lo tenías
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.holaaa.R // <--- ¡¡ESTA ES LA LÍNEA QUE FALTABA!!
-import com.example.holaaa.navigation.AppScreens
-import com.example.holaaa.ui.viewmodel.LoginViewModel
+import com.example.holaaa.ui.viewmodel.AuthViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     navController: NavController,
-    loginViewModel: LoginViewModel = viewModel()
+    authViewModel: AuthViewModel // Recibe el ViewModel de autenticación
 ) {
-    val uiState by loginViewModel.uiState.collectAsState()
-    var showError by remember { mutableStateOf(false) }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-
-        // [Image of Huerto Hogar logo]
-        // **IMPORTANTE**: La línea de la imagen está comentada.
-        // Si quieres que se vea, quita las barras "//" de abajo.
-        // (Asegúrate de tener un logo 'logo_huerto.png' en 'app/src/main/res/drawable/')
-
-        // Image(
-        //    painter = painterResource(id = R.drawable.logo_huerto), // Ahora R.drawable SÍ funciona
-        //    contentDescription = "Logo Huerto Hogar",
-        //    modifier = Modifier.size(150.dp)
-        // )
-
-        Text(
-            "Huerto Hogar",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.tertiary
-        )
-
-        Spacer(modifier = Modifier.height(48.dp))
+        Text("Iniciar Sesión", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
-            value = uiState.email,
-            onValueChange = { loginViewModel.onEmailChange(it) },
+            value = email,
+            onValueChange = { email = it },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = uiState.password,
-            onValueChange = { loginViewModel.onPasswordChange(it) },
+            value = password,
+            onValueChange = { password = it },
             label = { Text("Contraseña") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            modifier = Modifier.fillMaxWidth()
         )
-
-        if (showError) {
-            Text(
-                "Email o contraseña incorrectos",
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
-
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = {
-                if (loginViewModel.login()) {
-                    showError = false
-                    // Navega a la app principal y borra Login del stack
-                    navController.navigate(AppScreens.MainApp.route) {
-                        popUpTo(AppScreens.Login.route) {
-                            inclusive = true
-                        }
-                    }
-                } else {
-                    showError = true
-                }
+                // Llama al método de login en el ViewModel
+                authViewModel.login(email)
+                // Vuelve a la pantalla anterior (la de Cuenta)
+                navController.popBackStack()
             },
-            modifier = Modifier.fillMaxWidth().height(50.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Ingresar", style = MaterialTheme.typography.titleMedium)
+            Text("Entrar")
         }
     }
 }

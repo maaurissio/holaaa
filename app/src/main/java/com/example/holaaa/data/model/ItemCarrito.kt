@@ -1,5 +1,6 @@
 package com.example.holaaa.data.model
 
+import androidx.annotation.DrawableRes
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -8,6 +9,6 @@ data class ItemCarrito(
     @PrimaryKey val productoId: String,
     val nombre: String,
     val precio: Int,
-    val imagenUrl: String,
+    @DrawableRes val imagenResId: Int,
     var cantidad: Int
 )

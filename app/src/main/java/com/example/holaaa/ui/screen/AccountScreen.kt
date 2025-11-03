@@ -30,41 +30,71 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.holaaa.navigation.AppScreens
+import com.example.holaaa.ui.viewmodel.AuthViewModel
 
 @Composable
-fun AccountScreen() {
+fun AccountScreen(navController: NavController, authViewModel: AuthViewModel) {
+    val authState by authViewModel.uiState.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Usando color del tema
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(24.dp))
-        GuestProfileCard()
+
+        if (authState.isLoggedIn) {
+            UserProfileCard(email = authState.userEmail ?: "", onLogout = { authViewModel.logout() })
+        } else {
+            GuestProfileCard(navController = navController)
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
-        SettingsSection()
+        SettingsSection(isLoggedIn = authState.isLoggedIn, onLogout = { authViewModel.logout() })
         Spacer(modifier = Modifier.height(32.dp))
         SupportSection()
     }
 }
 
 @Composable
-fun GuestProfileCard() {
-    val context = LocalContext.current
+fun UserProfileCard(email: String, onLogout: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surface) // Usando color del tema
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Outlined.Person, contentDescription = "User Avatar", modifier = Modifier.size(60.dp), tint = MaterialTheme.colorScheme.primary)
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(email, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+        Button(onClick = onLogout, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) {
+            Text("Salir")
+        }
+    }
+}
+
+@Composable
+fun GuestProfileCard(navController: NavController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surface)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -83,7 +113,7 @@ fun GuestProfileCard() {
             Text("Inicia sesión para ver tus datos", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 14.sp)
         }
         Button(
-            onClick = { Toast.makeText(context, "Login/Register Clicked", Toast.LENGTH_SHORT).show() },
+            onClick = { navController.navigate(AppScreens.Login.route) },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Text("Entrar")
@@ -92,36 +122,17 @@ fun GuestProfileCard() {
 }
 
 @Composable
-fun SettingsSection() {
+fun SettingsSection(isLoggedIn: Boolean, onLogout: () -> Unit) {
     val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Ajustes", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp), color = MaterialTheme.colorScheme.onBackground)
-        SettingItem(
-            icon = Icons.Outlined.Person,
-            title = "Detalles de la Cuenta",
-            onClick = { Toast.makeText(context, "Account Details Clicked", Toast.LENGTH_SHORT).show() }
-        )
-        SettingItem(
-            icon = Icons.Outlined.NotificationsNone,
-            title = "Notificaciones",
-            onClick = { Toast.makeText(context, "Notifications Clicked", Toast.LENGTH_SHORT).show() }
-        )
-        SettingItem(
-            icon = Icons.Outlined.Email,
-            title = "Email",
-            onClick = { Toast.makeText(context, "Email Clicked", Toast.LENGTH_SHORT).show() }
-        )
-        SettingItem(
-            icon = Icons.Outlined.LocationOn,
-            title = "Servicios de ubicación",
-            onClick = { Toast.makeText(context, "Location Services Clicked", Toast.LENGTH_SHORT).show() }
-        )
-        SettingItem(
-            icon = Icons.AutoMirrored.Filled.ExitToApp,
-            title = "Cerrar Sesión",
-            isLogout = true,
-            onClick = { Toast.makeText(context, "Log Out Clicked", Toast.LENGTH_SHORT).show() }
-        )
+        SettingItem(icon = Icons.Outlined.Person, title = "Detalles de la Cuenta") { Toast.makeText(context, "Función no disponible para invitados", Toast.LENGTH_SHORT).show() }
+        SettingItem(icon = Icons.Outlined.NotificationsNone, title = "Notificaciones") { Toast.makeText(context, "Función no disponible para invitados", Toast.LENGTH_SHORT).show() }
+        SettingItem(icon = Icons.Outlined.Email, title = "Email") { Toast.makeText(context, "Función no disponible para invitados", Toast.LENGTH_SHORT).show() }
+        SettingItem(icon = Icons.Outlined.LocationOn, title = "Servicios de ubicación") { Toast.makeText(context, "Función no disponible para invitados", Toast.LENGTH_SHORT).show() }
+        if (isLoggedIn) {
+            SettingItem(icon = Icons.AutoMirrored.Filled.ExitToApp, title = "Cerrar Sesión", isLogout = true, onClick = onLogout)
+        }
     }
 }
 
@@ -130,11 +141,7 @@ fun SupportSection() {
     val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Soporte", fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp), color = MaterialTheme.colorScheme.onBackground)
-        SettingItem(
-            icon = Icons.Outlined.HelpOutline,
-            title = "Contáctanos",
-            onClick = { Toast.makeText(context, "Contact Us Clicked", Toast.LENGTH_SHORT).show() }
-        )
+        SettingItem(icon = Icons.Outlined.HelpOutline, title = "Contáctanos") { Toast.makeText(context, "Contact Us Clicked", Toast.LENGTH_SHORT).show() }
     }
 }
 
@@ -172,12 +179,7 @@ fun SettingItem(icon: ImageVector, title: String, isLogout: Boolean = false, onC
             modifier = Modifier.weight(1f)
         )
         if (!isLogout) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                contentDescription = "Go",
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.size(16.dp)
-            )
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = "Go", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), modifier = Modifier.size(16.dp))
         }
     }
 }

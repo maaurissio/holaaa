@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.holaaa.R
 import com.example.holaaa.data.local.AppDatabase
 import com.example.holaaa.data.model.ItemCarrito
 import com.example.holaaa.data.model.Producto
@@ -20,10 +21,10 @@ class ProductListViewModel(application: Application) : AndroidViewModel(applicat
 
     // Lista de productos simulada (basada en el PDF y proyecto React)
     private val _allProducts = listOf(
-        Producto("VR001", "Zanahorias", "Frescas y orgánicas de O'Higgins", 1200, 100, "https://i.imgur.com/wS22N9s.jpeg"),
-        Producto("VR002", "Espinacas Frescas", "Bolsa de 500g, orgánicas", 700, 80, "https://i.imgur.com/pXQ4nZg.jpeg"),
-        Producto("VR003", "Pimientos Tricolores", "Kilo de pimientos (rojo, amarillo, verde)", 1500, 120, "https://i.imgur.com/pZqY3Wl.jpeg"),
-        Producto("PO001", "Miel Orgánica", "Frasco de 500g, apicultores locales", 5000, 50, "https://i.imgur.com/1aA2y9U.jpeg")
+        Producto("VR001", "Zanahorias", "Frescas y orgánicas de O'Higgins", 1200, 100, R.drawable.zanahorias),
+        Producto("VR002", "Espinacas Frescas", "Bolsa de 500g, orgánicas", 700, 80, R.drawable.espinaca),
+        Producto("VR003", "Pimientos Tricolores", "Kilo de pimientos (rojo, amarillo, verde)", 1500, 120, R.drawable.pimientos),
+        Producto("PO001", "Miel Orgánica", "Frasco de 500g, apicultores locales", 5000, 50, R.drawable.miel)
         // Puedes agregar más productos aquí
     )
 
@@ -65,7 +66,7 @@ class ProductListViewModel(application: Application) : AndroidViewModel(applicat
                     productoId = producto.id,
                     nombre = producto.nombre,
                     precio = producto.precio,
-                    imagenUrl = producto.imagenUrl,
+                    imagenResId = producto.imagenResId,
                     cantidad = 1
                 )
                 cartDao.insertItem(newItem)

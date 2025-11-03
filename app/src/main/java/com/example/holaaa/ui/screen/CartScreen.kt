@@ -1,6 +1,7 @@
 package com.example.holaaa.ui.screen
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,9 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.holaaa.data.model.ItemCarrito
 import com.example.holaaa.ui.viewmodel.CartViewModel
 
@@ -150,8 +151,8 @@ fun CartItemRow(
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = item.imagenUrl,
+            Image(
+                painter = painterResource(id = item.imagenResId),
                 contentDescription = item.nombre,
                 modifier = Modifier.size(60.dp),
                 contentScale = ContentScale.Crop
